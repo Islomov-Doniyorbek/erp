@@ -5,7 +5,7 @@ const initialState = {
   documents: [
     {
         id: 0,
-        dealId: 9,
+        dealId: 0,
         cftype: "invoice",
         dNum: 14,
         ddate: "12.11.2025",
@@ -41,7 +41,7 @@ const initialState = {
     },
     {
         id: 4,
-        dealId: 9,
+        dealId: 0,
         cftype: "payment",
         dNum: '14-2',
         ddate: "12.11.2025",
@@ -50,7 +50,7 @@ const initialState = {
     },
     {
         id: 5,
-        dealId: 9,
+        dealId: 0,
         cftype: "payment",
         dNum: '14-3',
         ddate: "14.11.2025",
@@ -59,7 +59,7 @@ const initialState = {
     },
     {
         id: 6,
-        dealId: 9,
+        dealId: 0,
         cftype: "invoice",
         dNum: '14-4',
         ddate: "19.11.2025",

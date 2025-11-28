@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   contracts: [
     {
-      id: 9,
+      id: 0,
       counteragent: "GazProm",
       stir: "710011944",
       phone: "+998974114110",
@@ -117,7 +117,7 @@ const initialState = {
     },
     {
       id: 9,
-      counteragent: "OKMK",
+      counteragent: "GazProm",
       stir: "163699211",
       phone: "+998944777474",
       dealType: "purchase",
