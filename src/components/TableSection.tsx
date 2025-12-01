@@ -242,7 +242,7 @@ const TableSection = () => {
                         displayDeals.map(deal => (
                             <tr 
                                 key={deal.id} 
-                                onClick={() => goToTurnovers(deal.id)} 
+                                 
                                 className="cursor-pointer hover:bg-gray-100"
                             >
                                 <td className='border text-center' onClick={e => e.stopPropagation()}>
@@ -260,7 +260,9 @@ const TableSection = () => {
                                 </td>
                                 <td className='border'>
                                     <div className='flex'>
-                                        <div className='w-[40%] pl-1.5 border-r py-2'>
+                                        <div className='w-[40%] pl-1.5 border-r py-2'
+                                        onClick={() => goToTurnovers(deal.id)}
+                                        >
                                             {deal.dealMazmun}
                                         </div>
                                         <div className='w-[20%] pl-1.5 border-r py-2'>
