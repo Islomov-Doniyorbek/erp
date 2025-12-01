@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { MdClose } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from "@/store/store";
@@ -37,7 +37,8 @@ const Page = () => {
     console.log(form); 
   }
   return (
-    <div className='relative'>      
+    <Suspense >
+      <div className='relative'>      
       <div className="w-full flex justify-between">
         <h2 className='text-3xl font-bold'>Sotuvlar</h2>
         <button onClick={()=>dispatch(setCreateDog(true))} className='text-2xl font-bold px-5 py-1 text-white bg-[#6930C3] rounded-2xl cursor-pointer active:bg-[#8045e0]'>Yangi sotuv +</button>
@@ -130,6 +131,7 @@ const Page = () => {
         <TableSection/>
       </div>
     </div>
+    </Suspense>
   )
 }
 
