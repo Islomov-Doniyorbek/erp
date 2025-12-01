@@ -1,36 +1,10 @@
 'use client'
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import type { RootState } from "@/store/store";
 import { useM } from '@/app/context';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FaFilter } from 'react-icons/fa';
-
-// Type definitions
-interface Agent {
-  id: number;
-  countrAgentName: string;
-  countrAgentStir: string;
-  // ... other agent properties
-}
-
-interface Contract {
-  id: number;
-  dealType: string;
-  countrAgent: number;
-  dealMazmun: string;
-  dealNum: string | number;
-  dealDate: string;
-  dealSumm: string | number;
-  debit: string | number;
-  kredit: string | number;
-  // ... other contract properties
-}
-
-interface MergedContract extends Contract {
-  countrAgentName: string;
-  countrAgentStir: string;
-}
 
 const TableSection = () => {
     const { findPageTable, change } = useM();
@@ -39,11 +13,37 @@ const TableSection = () => {
     const searchParams = useSearchParams();
     const stirQuery = searchParams.get('stir');
 
-    const reduxDeals = useSelector((state: RootState) => state.contracts.contracts as Contract[]);
-    const agents = useSelector((state: RootState) => state.agents.agents as Agent[]);
+    const reduxDeals = useSelector((state: RootState) => state.contracts.contracts);
+    const agents = useSelector((state: RootState) => state.agents.agents);
+
+    // Filter state'lari
+    const [filterType, setFilterType] = useState<"" | "opening" | "closing">("");
+    const [stir, setStir] = useState("");
+    const [docNum, setDocNum] = useState("");
+    const [docDate, setDocDate] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    // --- Helper functions ---
+    const parseDate = useCallback((dateStr: string): Date => {
+        if (!dateStr) return new Date(0);
+        const [day, month, year] = dateStr.split(".");
+        return new Date(Number(year), Number(month) - 1, Number(day));
+    }, []);
+
+    const isSameDay = useCallback((d1: Date, d2: Date): boolean =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate(),
+        []
+    );
+
+    const goToTurnovers = useCallback((dealId: number) => {
+        router.push(`/contracts/${dealId}`);
+    }, [router]);
 
     // useMemo bilan agent ma'lumotlarini birlashtirish
-    const mergingContracts: MergedContract[] = useMemo(() => {
+    const mergingContracts = useMemo(() => {
         return reduxDeals.map(contract => {
             const agent = agents.find(a => a.id === contract.countrAgent)
             return {
@@ -54,63 +54,42 @@ const TableSection = () => {
         });
     }, [reduxDeals, agents]);
 
-    // --- PageType ---
-    const [originDeals, setOriginDeals] = useState<MergedContract[]>([]);
-    const [deals, setDeals] = useState<MergedContract[]>([]);
-    const [filterType, setFilterType] = useState<"" | "opening" | "closing">("");
-    const [stir, setStir] = useState("");
-    const [docNum, setDocNum] = useState("");
-    const [docDate, setDocDate] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    // useMemo bilan pageType ni aniqlash
+    const pageType = useMemo(() => {
+        const type = pathname.startsWith("/sales")
+            ? "sale"
+            : pathname.startsWith("/purchase")
+            ? "purchase"
+            : "";
+        
+        change(type);
+        return type;
+    }, [pathname, change]);
 
-    // --- Helper functions ---
-    const parseDate = (dateStr: string): Date => {
-        if (!dateStr) return new Date(0);
-        const [day, month, year] = dateStr.split(".");
-        return new Date(Number(year), Number(month) - 1, Number(day));
-    }
+    // useMemo bilan asosiy ma'lumotlarni filter qilish
+    const originDeals = useMemo(() => {
+        return mergingContracts.filter(d => d.dealType === pageType);
+    }, [mergingContracts, pageType]);
 
-    const isSameDay = (d1: Date, d2: Date): boolean =>
-        d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate();
-
-    const goToTurnovers = (dealId: number) => {
-        router.push(`/contracts/${dealId}`);
-    };
-
-    // Filterlarni qo'llash funksiyasi
-    const applyFilters = (data: MergedContract[]) => {
-        let filtered = [...data];
+    // useMemo bilan barcha filterlarni qo'llash
+    const deals = useMemo(() => {
+        let filtered = [...originDeals];
 
         // Ochiq / yopiq filter
         if (filterType === "opening") {
-            filtered = filtered.filter(d => {
-                const debitNum = typeof d.debit === 'string' ? parseFloat(d.debit) : d.debit || 0;
-                const dealSummNum = typeof d.dealSumm === 'string' ? parseFloat(d.dealSumm) : d.dealSumm || 0;
-                return debitNum !== dealSummNum;
-            });
+            filtered = filtered.filter(d => Number(d.debit ?? 0) !== Number(d.dealSumm ?? 0));
         } else if (filterType === "closing") {
-            filtered = filtered.filter(d => {
-                const debitNum = typeof d.debit === 'string' ? parseFloat(d.debit) : d.debit || 0;
-                const dealSummNum = typeof d.dealSumm === 'string' ? parseFloat(d.dealSumm) : d.dealSumm || 0;
-                return debitNum === dealSummNum;
-            });
+            filtered = filtered.filter(d => Number(d.debit ?? 0) === Number(d.dealSumm ?? 0));
         }
 
         // STIR
         if (stir.trim()) {
-            filtered = filtered.filter(d => 
-                d.countrAgentStir?.toString().trim() === stir.trim()
-            );
+            filtered = filtered.filter(d => d.countrAgentStir?.trim() === stir.trim());
         }
 
         // Raqam
         if (docNum.trim()) {
-            filtered = filtered.filter(d => 
-                d.dealNum?.toString().trim() === docNum.trim()
-            );
+            filtered = filtered.filter(d => d.dealNum?.toString().trim() === docNum.trim());
         }
 
         // Yagona sana
@@ -129,28 +108,10 @@ const TableSection = () => {
             });
         }
 
-        setDeals(filtered);
-    };
+        return filtered;
+    }, [originDeals, filterType, stir, docNum, docDate, startDate, endDate, parseDate, isSameDay]);
 
-    // Asosiy ma'lumotlarni yangilash - faqat bitta useEffect
-    const pageType = useMemo(() => {
-  if (pathname.startsWith("/sales")) return "sale";
-  if (pathname.startsWith("/purchase")) return "purchase";
-  return "";
-}, [pathname]);
-
-// const filteredDeals = useMemo(() => {
-//   return mergingContracts.filter(d => d.dealType === pageType);
-// }, [mergingContracts, pageType]);
-
-
-    const kontrAgent = findPageTable === "sale"
-        ? "Xaridor va buyurtma beruvchi korxonalar"
-        : findPageTable === "purchase"
-        ? "Mol yetkazib beruvchi korxonalar"
-        : "";
-
-    // STIR query bo'yicha filter qilish
+    // useMemo bilan STIR query bo'yicha filter
     const filteredDeals = useMemo(() => {
         if (stirQuery) {
             return deals.filter(deal => deal.countrAgentStir?.toString() === stirQuery);
@@ -158,11 +119,14 @@ const TableSection = () => {
         return deals;
     }, [deals, stirQuery]);
 
-    const calculateTotal = (debit: string | number, kredit: string | number): number => {
-        const debitNum = typeof debit === 'string' ? parseFloat(debit) : debit || 0;
-        const kreditNum = typeof kredit === 'string' ? parseFloat(kredit) : kredit || 0;
-        return debitNum - kreditNum;
-    };
+    // Table ko'rinishi uchun ma'lumotlar
+    const displayDeals = stirQuery ? filteredDeals : deals;
+
+    const kontrAgent = findPageTable === "sale"
+        ? "Xaridor va buyurtma beruvchi korxonalar"
+        : findPageTable === "purchase"
+        ? "Mol yetkazib beruvchi korxonalar"
+        : "";
 
     return (
         <>
@@ -274,8 +238,8 @@ const TableSection = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredDeals.length > 0 ? (
-                        filteredDeals.map(deal => (
+                    {displayDeals.length > 0 ? (
+                        displayDeals.map(deal => (
                             <tr 
                                 key={deal.id} 
                                 onClick={() => goToTurnovers(deal.id)} 
@@ -319,7 +283,7 @@ const TableSection = () => {
                                             {deal.kredit}
                                         </div>
                                         <div className='w-[34%] pl-1.5 py-2'>
-                                            {calculateTotal(deal.debit, deal.kredit)}
+                                            {Number(deal.debit || 0) - Number(deal.kredit || 0)}
                                         </div>
                                     </div>
                                 </td>
