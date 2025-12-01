@@ -13,12 +13,23 @@ const Page = () => {
 //   const deals = useSelector((state: RootState) => state.Pdeals.deals)
   const factures = useSelector((state:RootState) => state.documents.documents)
   const contracts = useSelector((state: RootState) => state.contracts.contracts);
+  const agents = useSelector((state: RootState) => state.agents.agents);
+  
+      // --- Merge contracts with agent info ---
+  const mergingContracts = contracts.map(contract => {
+      const agent = agents.find(a => a.id === contract.countrAgent)
+      return {
+          ...contract,
+          countrAgentName: agent?.countrAgentName || "",
+          countrAgentStir: agent?.countrAgentStir || ""
+      }
+  });
   const merginFactures = factures.map(fact=>{
-    const contract = contracts.find(c => c.id === fact.dealId)
+    const contract = mergingContracts.find(c => c.id === fact.dealId)
     return {
       ...fact,
-      counteragent: contract?.counteragent || "",
-      stir: contract?.stir || "",
+      counteragent: contract?.countrAgentName || "",
+      stir: contract?.countrAgentStir || "",
       contractType: contract?.dealType || "",
       dealId: contract?.id
     }

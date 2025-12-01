@@ -34,10 +34,8 @@ const Page = () => {
   }
   const saveData = () => {
     dispatch(addDeal(form));
-    console.log(form);
-    
+    console.log(form); 
   }
-  // useEffect( )
   return (
     <div className='relative'>      
       <div className="w-full flex justify-between">
@@ -57,7 +55,10 @@ const Page = () => {
         </div>
         <div className='flex gap-1.5 flex-col my-3'>
           <label htmlFor="customer"
-          className='text-[18px]'>Xaridor</label>
+          className='text-[18px] flex justify-between'>
+            <span>Xaridor</span>
+          <span>Yangi <input type='checkbox' /></span>
+          </label>
           <input type="text" id='customer' placeholder='LukOil LTZ'
           className='border rounded-[7px] border-[#6930c3] py-0.5 px-1'
           value={form.counteragent}

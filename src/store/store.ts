@@ -4,13 +4,15 @@ import dealsSlice from "./features/deals/dealSale";
 import dealsPurchaseReducer from "./features/deals/dealPurchase";
 import documentsSlice from "./features/deals/dealSaleExchanges";
 import documentSlice from "./features/deals/documents";
+import agentsSlice from "./features/deals/agents"
 
 export const store = configureStore({
     reducer: {
         bools: boolsReducer,
         contracts: dealsSlice,
         SDealsDocuments: documentsSlice,
-        documents: documentSlice
+        documents: documentSlice,
+        agents: agentsSlice
     }
 });
 

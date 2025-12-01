@@ -2,6 +2,7 @@
 import { useM } from '@/app/context'
 import Link from 'next/link'
 import React from 'react'
+import { BsPersonFillDown, BsPersonFillUp } from 'react-icons/bs'
 import { FaUser, FaUserAlt } from 'react-icons/fa'
 import { FaUserClock } from 'react-icons/fa6'
 import { FiRepeat, FiShoppingBag, FiShoppingCart, FiUsers } from 'react-icons/fi'
@@ -39,9 +40,16 @@ const Sidebar = () => {
         },
         {
             id:4,
-            title: "Agentlar",
-            icon: <FiUsers/>,
-            path: "/",
+            title: "Xaridorlar",
+            icon: <BsPersonFillUp/>,
+            path: "/customers",
+            findTable: "sale"
+        },
+        {
+            id:5,
+            title: "Yetkazib \nberuvchilar",
+            icon: <BsPersonFillDown/>,
+            path: "/suppliers",
             findTable: "sale"
         },
     ]
@@ -56,7 +64,7 @@ const Sidebar = () => {
                 className='flex flex-col items-center gap-2 my-5'
                 href={page.path}>
                     <span className='text-4xl'>{page.icon}</span>
-                    <span>{page.title}</span>
+                    <span className='text-center'>{page.title}</span>
                 </Link>
             ))
         }

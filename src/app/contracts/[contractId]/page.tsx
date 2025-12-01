@@ -12,15 +12,25 @@ export default function Page() {
 
   const contracts = useSelector((state: RootState) => state.contracts.contracts);
   const documents = useSelector((state: RootState) => state.documents.documents);
+  const agents = useSelector((state: RootState) => state.agents.agents);
 
+    // --- Merge contracts with agent info ---
+    const mergingContracts = contracts.map(contract => {
+        const agent = agents.find(a => a.id === contract.countrAgent)
+        return {
+            ...contract,
+            countrAgentName: agent?.countrAgentName || "",
+            countrAgentStir: agent?.countrAgentStir || ""
+        }
+    });  
   // --- MERGING (to‘g‘rilangan) ---
   const merging = documents.map(doc => {
-    const contract = contracts.find(c => c.id === doc.dealId);
+    const contract = mergingContracts.find(c => c.id === doc.dealId);
 
     return {
       ...doc,                      // documentning o‘zi
-      counteragent: contract?.counteragent || "",
-      stir: contract?.stir || "",
+      counteragent: contract?.countrAgentName || "",
+      stir: contract?.countrAgentStir || "",
       contractType: contract?.dealType || "",
       // MUHIM: doc.dealId ni o‘zgartirmaymiz!
       dealId: doc.dealId          
